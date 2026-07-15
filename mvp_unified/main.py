@@ -21,7 +21,7 @@ class MVPAgent:
         参数:
             model_name: 模型名称，若为None则使用默认模型
         """
-        self.current_model_name = model_name or "glm-4.5-flash"
+        self.current_model_name = model_name or "glm-5-flash"
         self.messages: List[Dict[str, Any]] = []
         self._init_system_message()
     
@@ -57,14 +57,25 @@ class MVPAgent:
         if not model_config:
             raise ValueError(f"未知模型: {model_name}")
         
-        response = completion(
-            model=model_config["model"],
-            api_key=model_config["api_key"],
-            messages=self.messages,
-            tools=TOOL_DEFS,
-            max_tokens=512,
-            temperature=0.7
-        )
+        api_base = model_config.get("api_base")
+        
+        if api_base:
+            response = completion(
+                model=model_config["model"],
+                api_key=model_config["api_key"],
+                api_base=api_base,
+                messages=self.messages,
+                max_tokens=512,
+                temperature=0.7
+            )
+        else:
+            response = completion(
+                model=model_config["model"],
+                api_key=model_config["api_key"],
+                messages=self.messages,
+                max_tokens=512,
+                temperature=0.7
+            )
         
         return response.choices[0].message.content
     
