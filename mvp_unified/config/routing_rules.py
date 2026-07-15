@@ -3,16 +3,18 @@ from typing import Dict, Any
 
 # 模型配置 - 使用 LiteLLM 兼容格式
 MODELS = {
-    "glm-4.5-flash": {
-        "model": "zhipu/glm-4.5-flash",
-        "api_key": "your_zhipu_api_key",
-        "description": "智谱AI GLM-4.5-Flash（推荐，响应快）",
+    "glm-4.7-flash": {
+        "model": "openai/glm-4.7-flash",
+        "api_key": "73d2ca9aa9574274ac522bb32caf0e91.pz18OIAB7ecFrkST",
+        "api_base": "https://api.z.ai/api/paas/v4",
+        "description": "智谱AI GLM-4.7-Flash（推荐，免费）",
         "capabilities": ["general", "tool_use"],
         "priority": 1
     },
     "glm-4-flash": {
-        "model": "zhipu/glm-4-flash",
+        "model": "openai/glm-4-flash",
         "api_key": "your_zhipu_api_key",
+        "api_base": "https://open.bigmodel.cn/api/paas/v4",
         "description": "智谱AI GLM-4-Flash（轻量版）",
         "capabilities": ["general"],
         "priority": 2
@@ -20,13 +22,15 @@ MODELS = {
     "deepseek-chat": {
         "model": "deepseek/deepseek-chat",
         "api_key": "your_deepseek_api_key",
+        "api_base": "https://api.deepseek.com/v1",
         "description": "深度求索 DeepSeek",
         "capabilities": ["general"],
         "priority": 3
     },
     "qwen-max": {
-        "model": "qwen/qwen-max",
+        "model": "openai/qwen-max",
         "api_key": "your_aliyun_api_key",
+        "api_base": "https://dashscope.aliyuncs.com/compatible-mode/v1",
         "description": "阿里云通义千问",
         "capabilities": ["general", "tool_use"],
         "priority": 4
@@ -34,6 +38,7 @@ MODELS = {
     "gpt-4o-mini": {
         "model": "gpt-4o-mini",
         "api_key": "your_openai_api_key",
+        "api_base": None,
         "description": "OpenAI GPT-4o-mini",
         "capabilities": ["general", "tool_use"],
         "priority": 5
@@ -42,56 +47,46 @@ MODELS = {
 
 # 路由策略配置
 ROUTING_STRATEGIES = {
-    "default": "glm-4.5-flash",  # 默认模型
-    
-    # 按用户意图路由
+    "default": "glm-4.7-flash",
+
     "intent_based": {
-        "weather": "glm-4.5-flash",      # 天气查询
-        "stock": "glm-4.5-flash",        # 股票查询
-        "code": "deepseek-chat",         # 代码生成
-        "math": "gpt-4o-mini",           # 数学推理
-        "general": "glm-4.5-flash"       # 通用对话
+        "weather": "glm-4.7-flash",
+        "stock": "glm-4.7-flash",
+        "code": "deepseek-chat",
+        "math": "gpt-4o-mini",
+        "general": "glm-4.7-flash"
     },
-    
-    # 按工具类型路由
+
     "tool_based": {
-        "weather_tool": "glm-4.5-flash",
-        "stock_tool": "glm-4.5-flash"
+        "weather_tool": "glm-4.7-flash",
+        "stock_tool": "glm-4.7-flash"
     },
-    
-    # 按模型能力路由
+
     "capability_based": {
-        "tool_use": ["glm-4.5-flash", "qwen-max", "gpt-4o-mini"],
-        "general": ["glm-4.5-flash", "glm-4-flash", "deepseek-chat"]
+        "tool_use": ["glm-4.7-flash", "qwen-max", "gpt-4o-mini"],
+        "general": ["glm-4.7-flash", "glm-4-flash", "deepseek-chat"]
     }
 }
 
 
 def get_model_config(model_name: str) -> Dict[str, Any]:
-    """获取模型配置"""
     return MODELS.get(model_name, {})
 
 
 def get_routing_strategy(strategy: str = "default") -> Any:
-    """获取路由策略"""
     return ROUTING_STRATEGIES.get(strategy, ROUTING_STRATEGIES["default"])
 
 
 def get_models_by_capability(capability: str) -> list:
-    """按能力获取可用模型列表"""
-    return [name for name, config in MODELS.items() 
+    return [name for name, config in MODELS.items()
             if capability in config.get("capabilities", [])]
 
 
 def get_best_model(intent: str = None, tool_name: str = None) -> str:
-    """根据意图或工具选择最佳模型"""
-    # 优先按工具路由
     if tool_name and tool_name in ROUTING_STRATEGIES.get("tool_based", {}):
         return ROUTING_STRATEGIES["tool_based"][tool_name]
-    
-    # 按意图路由
+
     if intent and intent in ROUTING_STRATEGIES.get("intent_based", {}):
         return ROUTING_STRATEGIES["intent_based"][intent]
-    
-    # 默认模型
+
     return ROUTING_STRATEGIES["default"]
