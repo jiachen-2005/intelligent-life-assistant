@@ -43,6 +43,7 @@ class MVPAgent:
 """
         self.messages.append({"role": "system", "content": system_prompt})
     
+    
     def _call_llm(self, model_name: str) -> str:
         """
         调用LiteLLM

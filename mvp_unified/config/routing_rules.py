@@ -1,7 +1,6 @@
 """模型路由规则配置 - 集中管理所有模型和路由策略"""
 from typing import Dict, Any
 
-
 # 模型配置 - 使用 LiteLLM 兼容格式
 MODELS = {
     "glm-4.7-flash": {
